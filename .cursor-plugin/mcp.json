@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "superme": {
+      "type": "http",
+      "url": "https://mcp.superme.ai"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "superme": {
+      "type": "http",
+      "url": "https://mcp.superme.ai",
+      "note": "Official SuperMe hosted MCP server. Uses OAuth — on first use Grok opens a browser to sign in to SuperMe; there is no API key to paste."
+    }
+  }
+}
