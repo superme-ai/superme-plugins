@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 """Validate the marketplace manifests the way each catalog reads them.
 
-Both catalogs clone this repo at a pinned SHA and resolve every path the
-manifest declares against the *plugin root* — which, because `.cursor-plugin/`
-and `.grok-plugin/` sit at the top level, is the repo root. A path that is
-right in an editor and wrong in their clone fails in their CI, not ours, so
-these checks run here first.
+Both catalogs clone this repo at a pinned SHA and resolve manifest paths against
+the plugin root, which here is the repo root.
 
 Run: python3 scripts/validate_manifests.py
 """
@@ -44,10 +41,9 @@ for market, manifest_path in (
         f"{market}: repository must point at this repo, got {manifest['repository']!r}",
     )
 
-    # The regression this repo exists to prevent. A `variables` schema turns the
-    # credential into an install-time prompt, and the `${VAR}` header it feeds
-    # silences mcp.superme.ai's WWW-Authenticate challenge — so the client never
-    # runs its OAuth flow and the user is back to pasting a ten-year API key.
+    # A `variables` schema turns the credential into an install-time prompt, and
+    # the `${VAR}` header it feeds silences mcp.superme.ai's WWW-Authenticate
+    # challenge — so the client never runs its OAuth flow.
     check("variables" not in manifest, f"{market}: manifest declares `variables`; the plugin must authenticate over OAuth")
 
     raw = (ROOT / manifest["mcpServers"]).read_text()
@@ -60,9 +56,8 @@ for market, manifest_path in (
     check(server["type"] == "http", f"{market}: expected transport 'http', got {server['type']!r}")
     check(server["url"] == SERVER_URL, f"{market}: expected {SERVER_URL}, got {server['url']!r}")
 
-# Each catalog treats the repo root as the plugin root and walks these
-# locations unconditionally. Anything added here for an unrelated reason would
-# silently publish as installable plugin surface at the next SHA bump.
+# Both catalogs scan these locations at the plugin root, so anything added here
+# publishes as installable plugin surface at the next pinned commit.
 surface = ["skills", "commands", "agents", "rules", "hooks", "hooks/hooks.json", "mcp.json", ".mcp.json", ".lsp.json"]
 stray = [p for p in surface if (ROOT / p).exists()]
 check(not stray, f"unexpected plugin surface at the repo root: {stray}")
