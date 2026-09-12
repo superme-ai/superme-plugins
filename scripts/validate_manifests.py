@@ -16,17 +16,29 @@ from urllib.parse import parse_qs, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVER_URL = "https://mcp.superme.ai"
+REPO_URL = "https://github.com/superme-ai/superme-plugins"
 
-# Where a Marketplace user is sent when Cursor never offers them a sign-in. Cursor renders
-# the manifest `description` in the plugin panel and nothing else we author, so the pointer
-# has to survive inside that one string; the link itself lives in README.md.
-FALLBACK_POINTER = "github.com/superme-ai/superme-plugins"
-INSTALL_DEEPLINK = "https://cursor.com/en/install-mcp"
+# Cursor renders the manifest `description` in its plugin panel and nothing else we author,
+# so the sign-in fallback has to survive inside that one string. It can only carry a pointer,
+# not the deeplink itself, which lives in README.md.
+#
+# Why the fallback exists: on some Cursor builds (reported across 3.14.x-3.18.x, no known
+# fixed build) the panel lists a plugin-supplied MCP server but never renders the Accounts
+# row or the Authenticate button, so OAuth never starts. Our manifest and mcp.superme.ai are
+# both correct; the bug is client-side. See forum.cursor.com/t/170058.
+#
+# Removing this: once Cursor ships a build where the Authenticate control appears reliably
+# and it is old enough to be the floor in `minClientVersions.cursor`, drop the two
+# description checks below, the README section, and shorten the description again.
+FALLBACK_POINTER = REPO_URL.removeprefix("https://")
+INSTALL_DEEPLINK = re.compile(r"https://cursor\.com/(?:[a-z]{2}/)?install-mcp\?\S+?(?=[)\s])")
 
-# cursor/plugins schemas/plugin.schema.json is `additionalProperties: false` and has no
-# auth, oauth, account, connector or token property. The missing Authenticate button is a
-# client bug, not a missing manifest field — adding one here would fail the catalog's own
-# validation while fixing nothing, so pin the accepted set.
+# Mirrors the properties of cursor/plugins schemas/plugin.schema.json, which is
+# `additionalProperties: false` — checked against that schema 2026-09-12, 21/21 exact:
+# https://github.com/cursor/plugins/blob/main/schemas/plugin.schema.json
+# It has no auth, oauth, account, connector, credential, token or secret property; every
+# "auth" substring in it is the word "author". That is the point of pinning it: the missing
+# Authenticate button tempts an invented auth field, which Cursor's own validation rejects.
 CURSOR_MANIFEST_FIELDS = {
     "name", "displayName", "description", "version", "minClientVersions", "author",
     "publisher", "homepage", "repository", "license", "logo", "keywords", "category",
@@ -45,18 +57,40 @@ def load(relative: str) -> dict:
     return json.loads((ROOT / relative).read_text())
 
 
+cursor = load(".cursor-plugin/plugin.json")
+unknown = sorted(set(cursor) - CURSOR_MANIFEST_FIELDS)
+check(not unknown, f"cursor: plugin.json declares field names Cursor's schema rejects: {unknown} (if Cursor added one, re-sync CURSOR_MANIFEST_FIELDS)")
+
+description = cursor.get("description") or ""
+check(FALLBACK_POINTER in description, f"cursor: description must carry the sign-in fallback pointer {FALLBACK_POINTER!r}")
+# A listing that leads with a workaround is worse than the bug it explains, and list views
+# truncate the tail. Requiring the pointer past the halfway mark keeps the value proposition
+# in front without pinning the prose — and unlike splitting on sentences, it cannot be
+# satisfied by prefixing a short throwaway clause like "Note. " or "E.g. ".
+if FALLBACK_POINTER in description:
+    check(
+        description.index(FALLBACK_POINTER) >= len(description) // 2,
+        "cursor: description leads with the sign-in fallback; the value proposition must come first",
+    )
+
 for market, manifest_path in (
     ("cursor", ".cursor-plugin/plugin.json"),
     ("grok", ".grok-plugin/plugin.json"),
 ):
     manifest = load(manifest_path)
 
+    # Report a missing key instead of tracebacking over the failures collected so far.
+    missing = [f for f in ("mcpServers", "logo", "repository") if f not in manifest]
+    check(not missing, f"{market}: {manifest_path} is missing {missing}")
+    if missing:
+        continue
+
     for field in ("mcpServers", "logo"):
         target = ROOT / manifest[field]
         check(target.is_file(), f"{market}: {manifest_path} -> {field} {manifest[field]!r} does not resolve from the repo root")
 
     check(
-        manifest["repository"] == "https://github.com/superme-ai/superme-plugins",
+        manifest["repository"] == REPO_URL,
         f"{market}: repository must point at this repo, got {manifest['repository']!r}",
     )
 
@@ -75,31 +109,14 @@ for market, manifest_path in (
     check(server["type"] == "http", f"{market}: expected transport 'http', got {server['type']!r}")
     check(server["url"] == SERVER_URL, f"{market}: expected {SERVER_URL}, got {server['url']!r}")
 
-cursor = load(".cursor-plugin/plugin.json")
-
-check(
-    not (set(cursor) - CURSOR_MANIFEST_FIELDS),
-    f"cursor: plugin.json declares fields Cursor's schema rejects: {sorted(set(cursor) - CURSOR_MANIFEST_FIELDS)}",
-)
-
-# The sign-in fallback rides in `description`, but a listing that leads with a workaround
-# reads like a bug notice — and marketplace views truncate. Keep the pointer out of the
-# first sentence so the value proposition is what survives either way.
-description = cursor["description"]
-lead, _, rest = description.partition(". ")
-check(FALLBACK_POINTER in rest, f"cursor: description must carry the sign-in fallback pointer {FALLBACK_POINTER!r} after its opening sentence")
-check(FALLBACK_POINTER not in lead, "cursor: description leads with the sign-in fallback; the value proposition must come first")
-check(
-    cursor["repository"].endswith(FALLBACK_POINTER),
-    f"cursor: description points at {FALLBACK_POINTER!r} but repository is {cursor['repository']!r}",
-)
-
 # The pointer is only worth anything if the page it names still carries a deeplink that
-# installs *this* server over the remote-MCP path.
+# installs the same server, over the same transport, as the plugin itself.
 readme = (ROOT / "README.md").read_text()
-deeplinks = re.findall(rf"{re.escape(INSTALL_DEEPLINK)}\?\S+?(?=[)\s])", readme)
-check(bool(deeplinks), f"README.md must keep an {INSTALL_DEEPLINK} fallback link for users Cursor never prompts")
-for link in deeplinks:
+deeplinks = INSTALL_DEEPLINK.findall(readme)
+check(bool(deeplinks), "README.md must keep a cursor.com install-mcp fallback link for users Cursor never prompts")
+# The loop above already reported a missing mcpServers; don't traceback over its failures.
+expected = json.loads((ROOT / cursor["mcpServers"]).read_text())["mcpServers"]["superme"] if "mcpServers" in cursor else None
+for link in deeplinks if expected else []:
     encoded = parse_qs(urlsplit(link).query).get("config", [""])[0]
     padded = encoded + "=" * (-len(encoded) % 4)
     try:
@@ -107,7 +124,7 @@ for link in deeplinks:
     except Exception as exc:  # noqa: BLE001 - any decode failure is the same defect
         failures.append(f"README.md: install deeplink config is not decodable base64 JSON ({exc})")
         continue
-    check(config.get("url") == SERVER_URL, f"README.md: install deeplink resolves to {config.get('url')!r}, expected {SERVER_URL}")
+    check(config == expected, f"README.md: install deeplink installs {config}, but the plugin declares {expected}")
 
 # Both catalogs scan these locations at the plugin root, so anything added here
 # publishes as installable plugin surface at the next pinned commit.

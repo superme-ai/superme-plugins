@@ -33,7 +33,7 @@ the panel shows the connector but no **Accounts** row and no **Authenticate** bu
 no browser ever opens. Add the same server directly instead — this is the path Cursor's
 own remote-MCP connectors use, and it prompts for sign-in normally:
 
-[**Add SuperMe to Cursor**](https://cursor.com/en/install-mcp?name=SuperMe&config=eyJ1cmwiOiJodHRwczovL21jcC5zdXBlcm1lLmFpIn0=)
+[**Add SuperMe to Cursor**](https://cursor.com/en/install-mcp?name=SuperMe&config=eyJ0eXBlIjoiaHR0cCIsInVybCI6Imh0dHBzOi8vbWNwLnN1cGVybWUuYWkifQ==)
 
 Nothing needs to change on your side: same server, same OAuth, still no API key. You can
 leave the plugin installed or remove it.
@@ -67,12 +67,19 @@ python3 scripts/validate_manifests.py
 
 CI runs this on every push. It checks that every declared path resolves, that neither
 config carries a credential, and that both point at the same server. It also pins the
-sign-in fallback: the Cursor manifest must declare only fields Cursor's schema accepts
-(there is no auth field to add — the missing Authenticate button is a client bug), its
-`description` must carry the fallback pointer without leading with it, and the README
-deeplink must still decode to `https://mcp.superme.ai`. It fails if
-`skills/`, `commands/`, `agents/`, `rules/`, `hooks/`, `mcp.json` or `.mcp.json` appears
-at the repo root — both catalogs scan those locations, so anything added there publishes
+sign-in fallback: the Cursor manifest may use only field *names* Cursor's schema accepts,
+its `description` must carry the fallback pointer somewhere past the halfway mark, and the
+README deeplink must decode to the same server entry the plugin itself declares.
+
+The fallback is a workaround for a Cursor client bug, not a permanent feature. On some
+builds (reported across 3.14.x–3.18.x, no known fixed build) the panel lists a
+plugin-supplied MCP server but never renders the **Accounts** row or the **Authenticate**
+button, so OAuth never starts — there is no manifest field that fixes this, and inventing
+one fails Cursor's own review. When a fixed build is old enough to be the floor in
+`minClientVersions.cursor`, drop the description checks, the README section above, and
+shorten the description again. It fails if `skills/`,
+`commands/`, `agents/`, `rules/`, `hooks/`, `hooks/hooks.json`, `mcp.json`, `.mcp.json` or
+`.lsp.json` appears at the repo root — both catalogs scan those locations, so anything added there publishes
 as installable plugin surface.
 
 Bump `.grok-plugin/plugin.json`'s `version` in the same commit as any change to that
