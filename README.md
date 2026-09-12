@@ -26,8 +26,17 @@ makes a compliant client open a browser to sign you in.
 3. The first time Cursor reaches for a SuperMe tool it opens a browser to sign in.
    Approve it.
 
-You can also add the server directly:
+#### If Cursor never asks you to sign in
+
+Some Cursor builds never surface the sign-in control for a plugin-supplied MCP server:
+the panel shows the connector but no **Accounts** row and no **Authenticate** button, and
+no browser ever opens. Add the same server directly instead — this is the path Cursor's
+own remote-MCP connectors use, and it prompts for sign-in normally:
+
 [**Add SuperMe to Cursor**](https://cursor.com/en/install-mcp?name=SuperMe&config=eyJ1cmwiOiJodHRwczovL21jcC5zdXBlcm1lLmFpIn0=)
+
+Nothing needs to change on your side: same server, same OAuth, still no API key. You can
+leave the plugin installed or remove it.
 
 ### Grok Build
 
@@ -57,14 +66,19 @@ python3 scripts/validate_manifests.py
 ```
 
 CI runs this on every push. It checks that every declared path resolves, that neither
-config carries a credential, and that both point at the same server. It also fails if
+config carries a credential, and that both point at the same server. It also pins the
+sign-in fallback: the Cursor manifest must declare only fields Cursor's schema accepts
+(there is no auth field to add — the missing Authenticate button is a client bug), its
+`description` must carry the fallback pointer without leading with it, and the README
+deeplink must still decode to `https://mcp.superme.ai`. It fails if
 `skills/`, `commands/`, `agents/`, `rules/`, `hooks/`, `mcp.json` or `.mcp.json` appears
 at the repo root — both catalogs scan those locations, so anything added there publishes
 as installable plugin surface.
 
-Bump the relevant `plugin.json` `version` in the same commit as any change to that
-plugin's directory: Grok's indexer skips a plugin whose version is unchanged, and Cursor
-manually reviews every update.
+Bump `.grok-plugin/plugin.json`'s `version` in the same commit as any change to that
+directory — Grok's indexer skips a plugin whose version is unchanged. `.cursor-plugin/`
+stays at `1.0.0`: Cursor gates every update on manual review, not on the version string,
+so bumping it buys nothing and only invites drift between the two manifests.
 
 ## License
 

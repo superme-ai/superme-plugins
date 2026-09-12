@@ -5,7 +5,7 @@
   "minClientVersions": {
     "cursor": "3.13.0"
   },
-  "description": "Ask people who've been there, get multiple perspectives, and make better decisions about your work.",
+  "description": "Ask people who've been there, get multiple perspectives, and make better decisions about your work. Browser sign-in on first use, no API key. If you're never prompted, github.com/superme-ai/superme-plugins has a one-click install link.",
   "author": {
     "name": "SuperMe",
     "email": "support@superme.ai"
