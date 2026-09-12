@@ -14,8 +14,8 @@ assets/             shared logo
 There is no API key to paste. `https://mcp.superme.ai` is an OAuth 2.1 protected
 resource: it serves `/.well-known/oauth-protected-resource` and
 `/.well-known/oauth-authorization-server`, supports dynamic client registration and PKCE,
-and answers unauthenticated requests with a `WWW-Authenticate` challenge — which is what
-makes a compliant client open a browser to sign you in.
+and challenges unauthenticated requests with `WWW-Authenticate`. A client that follows that
+challenge opens a browser to sign you in.
 
 ## Install
 
@@ -26,17 +26,20 @@ makes a compliant client open a browser to sign you in.
 3. The first time Cursor reaches for a SuperMe tool it opens a browser to sign in.
    Approve it.
 
-#### If Cursor never asks you to sign in
+#### If you are never asked to sign in
 
-Some Cursor builds never surface the sign-in control for a plugin-supplied MCP server:
-the panel shows the connector but no **Accounts** row and no **Authenticate** button, and
-no browser ever opens. Add the same server directly instead — this is the path Cursor's
-own remote-MCP connectors use, and it prompts for sign-in normally:
+You may find the plugin panel lists the SuperMe connector but shows no **Accounts** row and
+no **Authenticate** button, and no browser ever opens. That is a known limitation on our
+side, and we are fixing it: today `mcp.superme.ai` requires authorization from the very
+first request of the MCP handshake, so a client cannot complete the handshake or read the
+tool list before signing in — and without that, there is nothing for the panel to attach an
+account to.
+
+Until the fix ships, add the same server directly:
 
 [**Add SuperMe to Cursor**](https://cursor.com/en/install-mcp?name=SuperMe&config=eyJ0eXBlIjoiaHR0cCIsInVybCI6Imh0dHBzOi8vbWNwLnN1cGVybWUuYWkifQ==)
 
-Nothing needs to change on your side: same server, same OAuth, still no API key. You can
-leave the plugin installed or remove it.
+Same server, same OAuth, still no API key. You can leave the plugin installed or remove it.
 
 ### Grok Build
 
@@ -66,21 +69,22 @@ python3 scripts/validate_manifests.py
 ```
 
 CI runs this on every push. It checks that every declared path resolves, that neither
-config carries a credential, and that both point at the same server. It also pins the
-sign-in fallback: the Cursor manifest may use only field *names* Cursor's schema accepts,
-its `description` must carry the fallback pointer somewhere past the halfway mark, and the
-README deeplink must decode to the same server entry the plugin itself declares.
-
-The fallback is a workaround for a Cursor client bug, not a permanent feature. On some
-builds (reported across 3.14.x–3.18.x, no known fixed build) the panel lists a
-plugin-supplied MCP server but never renders the **Accounts** row or the **Authenticate**
-button, so OAuth never starts — there is no manifest field that fixes this, and inventing
-one fails Cursor's own review. When a fixed build is old enough to be the floor in
-`minClientVersions.cursor`, drop the description checks, the README section above, and
-shorten the description again. It fails if `skills/`,
+config carries a credential, and that both point at the same server. It fails if `skills/`,
 `commands/`, `agents/`, `rules/`, `hooks/`, `hooks/hooks.json`, `mcp.json`, `.mcp.json` or
-`.lsp.json` appears at the repo root — both catalogs scan those locations, so anything added there publishes
-as installable plugin surface.
+`.lsp.json` appears at the repo root — both catalogs scan those locations, so anything
+added there publishes as installable plugin surface.
+
+It also pins the sign-in fallback: the Cursor manifest may use only field *names* Cursor's
+schema accepts, its `description` must carry the fallback pointer somewhere past the
+halfway mark, and the README deeplink must decode to the same server entry the plugin
+itself declares.
+
+That fallback is a stopgap, not a permanent feature. It exists because `mcp.superme.ai`
+currently requires authorization from the first request of the MCP handshake, so a client
+never reaches a state the plugin panel can hang an account on. There is no manifest field
+that changes this — the fix belongs in the server. Once it ships and clients can complete
+the handshake unauthenticated, drop the description checks, the README section above, and
+shorten the description again.
 
 Bump `.grok-plugin/plugin.json`'s `version` in the same commit as any change to that
 directory — Grok's indexer skips a plugin whose version is unchanged. `.cursor-plugin/`

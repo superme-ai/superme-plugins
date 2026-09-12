@@ -22,14 +22,15 @@ REPO_URL = "https://github.com/superme-ai/superme-plugins"
 # so the sign-in fallback has to survive inside that one string. It can only carry a pointer,
 # not the deeplink itself, which lives in README.md.
 #
-# Why the fallback exists: on some Cursor builds (reported across 3.14.x-3.18.x, no known
-# fixed build) the panel lists a plugin-supplied MCP server but never renders the Accounts
-# row or the Authenticate button, so OAuth never starts. Our manifest and mcp.superme.ai are
-# both correct; the bug is client-side. See forum.cursor.com/t/170058.
+# Why the fallback exists: mcp.superme.ai currently requires authorization from the very
+# first request of the MCP handshake, so a client cannot complete `initialize` or read the
+# tool list before signing in. With no negotiated session there is nothing for the plugin
+# panel to attach an account to, so it shows the connector with no Accounts row and no
+# Authenticate button. The fix belongs in the server, not in any manifest field.
 #
-# Removing this: once Cursor ships a build where the Authenticate control appears reliably
-# and it is old enough to be the floor in `minClientVersions.cursor`, drop the two
-# description checks below, the README section, and shorten the description again.
+# Removing this: once the server lets a client finish the handshake and list tools
+# unauthenticated, and challenges at call time instead, drop the two description checks
+# below, the README section, and shorten the description again.
 FALLBACK_POINTER = REPO_URL.removeprefix("https://")
 INSTALL_DEEPLINK = re.compile(r"https://cursor\.com/(?:[a-z]{2}/)?install-mcp\?\S+?(?=[)\s])")
 
@@ -37,8 +38,9 @@ INSTALL_DEEPLINK = re.compile(r"https://cursor\.com/(?:[a-z]{2}/)?install-mcp\?\
 # `additionalProperties: false` — checked against that schema 2026-09-12, 21/21 exact:
 # https://github.com/cursor/plugins/blob/main/schemas/plugin.schema.json
 # It has no auth, oauth, account, connector, credential, token or secret property; every
-# "auth" substring in it is the word "author". That is the point of pinning it: the missing
-# Authenticate button tempts an invented auth field, which Cursor's own validation rejects.
+# "auth" substring in it is the word "author". That is the point of pinning it: a missing
+# Authenticate button tempts an invented auth field, which this schema cannot accept and
+# which would not help anyway — the affordance depends on the server, not the manifest.
 CURSOR_MANIFEST_FIELDS = {
     "name", "displayName", "description", "version", "minClientVersions", "author",
     "publisher", "homepage", "repository", "license", "logo", "keywords", "category",
