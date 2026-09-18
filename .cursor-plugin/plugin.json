@@ -1,10 +1,7 @@
 {
   "name": "superme",
   "displayName": "SuperMe",
-  "version": "1.0.0",
-  "minClientVersions": {
-    "cursor": "3.13.0"
-  },
+  "version": "1.0.1",
   "description": "Ask people who've been there, get multiple perspectives, and make better decisions about your work.",
   "author": {
     "name": "SuperMe",
