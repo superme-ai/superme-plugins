@@ -1,7 +1,7 @@
 {
   "name": "superme",
   "displayName": "SuperMe",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Ask people who've been there, get multiple perspectives, and make better decisions about your work.",
   "author": {
     "name": "SuperMe",
@@ -20,12 +20,15 @@
     "workgroups",
     "mcp"
   ],
-  "category": "integrations",
+  "category": "productivity",
   "tags": [
     "superme",
-    "mcp",
+    "productivity",
+    "decision-making",
+    "experts",
     "research",
-    "knowledge"
+    "knowledge",
+    "mcp"
   ],
   "mcpServers": "./.cursor-plugin/mcp.json"
 }
