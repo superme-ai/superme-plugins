@@ -1,0 +1,36 @@
+{
+  "name": "superme",
+  "version": "1.0.3",
+  "description": "Think it through with the people who’ve done the work.\n\nSuperMe brings perspectives from top operator profiles across product, growth, and marketing. Ask for advice, ideas, or feedback, and you’ll see constructive pushback, key context, and relevant trade-offs debated in real time by the actual people who’ve done the work—not just a single, summarized chat response.",
+  "author": {
+    "name": "SuperMe",
+    "url": "https://superme.ai"
+  },
+  "homepage": "https://superme.ai",
+  "repository": "https://github.com/superme-ai/superme-plugins",
+  "supportUrl": "https://www.superme.ai/support",
+  "privacyPolicyUrl": "https://www.superme.ai/privacy",
+  "termsOfServiceUrl": "https://www.superme.ai/terms",
+  "keywords": [
+    "superme",
+    "professional-network",
+    "mcp",
+    "knowledge",
+    "research",
+    "workgroups",
+    "superme.ai",
+    "ask superme",
+    "superme network",
+    "productivity",
+    "decision-making"
+  ],
+  "displayName": "SuperMe",
+  "icon": "./assets/icon.png",
+  "documentationUrl": "https://superme.ai",
+  "mcpServers": {
+    "superme": {
+      "type": "streamable-http",
+      "url": "https://mcp.superme.ai"
+    }
+  }
+}
