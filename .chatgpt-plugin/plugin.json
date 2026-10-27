@@ -1,6 +1,6 @@
 {
   "name": "app-6a7e52504e0c8191b8bcba6b30cf8f92",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Think it through with the people who’ve done the work.\n\nSuperMe brings perspectives from top operator profiles across product, growth, and marketing. Ask for advice, ideas, or feedback, and you’ll see constructive pushback, key context, and relevant trade-offs debated in real time by the actual people who’ve done the work—not just a single, summarized chat response.",
   "author": {
     "name": "SuperMe",
@@ -25,16 +25,16 @@
     "com.openai": {
       "interface": {
         "capabilities": [],
-        "category": "Productivity",
+        "category": "Communication",
         "defaultPrompt": [
           "I want to ask my boss for a raise. I want advice from people who've actually done this on both sides of the table in my field",
           "I'm presenting my marketing plan next week. I want feedback on my doc (see attached) -- find experienced people to take a look."
         ],
         "developerName": "SuperMe",
-        "displayName": "SuperMe",
+        "displayName": "SuperMe Network",
         "longDescription": "Think it through with the people who’ve done the work.\n\nSuperMe brings perspectives from top operator profiles across product, growth, and marketing. Ask for advice, ideas, or feedback, and you’ll see constructive pushback, key context, and relevant trade-offs debated in real time by the actual people who’ve done the work—not just a single, summarized chat response.",
         "privacyPolicyURL": "https://www.superme.ai/privacy",
-        "shortDescription": "Get a trusted sounding board",
+        "shortDescription": "Ask people who’ve done it",
         "supportURL": "https://www.superme.ai/support",
         "termsOfServiceURL": "https://www.superme.ai/terms",
         "websiteURL": "https://superme.ai",
