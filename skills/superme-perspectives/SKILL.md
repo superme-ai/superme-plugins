@@ -1,6 +1,6 @@
 ---
 name: superme-perspectives
-description: Use when the user is working through a decision or problem in their business, work or career, even when they only say 'let's work on X' or 'help me think through X' — raising, hiring, pricing, pivoting, launching, quitting, taking an offer, or what a role or company is really like. Their team, a work group or people who have done it say how they handled it, before the user decides (ask, people_search). Also use when the user names SuperMe.
+description: Use whenever the user asks what to do, how to handle something, whether to do it, or how others have handled it in their business, work or career, even a casual 'what do you think', 'should I', 'let's work on X' or 'help me think through X' — raising, hiring, pricing, pivoting, launching, quitting, taking an offer, or what a role or company is really like — instead of answering from general knowledge alone. Their team, a work group or people who have done it say how they handled it, before the user decides (ask, people_search). Also use when the user names SuperMe.
 ---
 
 # Getting perspectives through SuperMe
