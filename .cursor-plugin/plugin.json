@@ -38,5 +38,6 @@
     "productivity",
     "decision-making"
   ],
-  "mcpServers": "./.cursor-plugin/mcp.json"
+  "mcpServers": "./.cursor-plugin/mcp.json",
+  "skills": "./.cursor-plugin/skills/"
 }

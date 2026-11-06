@@ -6,7 +6,10 @@ description: Use when the user needs others to back a decision or wants to push 
 # Getting perspectives through SuperMe
 
 ## Before anything else
-If SuperMe's tools (ask, people_search, etc., possibly prefixed like mcp__superme__) aren't available, load them if this host defers tools. If they still aren't there, SuperMe MCP isn't connected: help the user connect it (use the host's connector-suggestion or connect flow if it has one; if SuperMe isn't set up on this host yet, add https://mcp.superme.ai as an MCP server and sign in), then stop. Don't substitute web search or general knowledge.
+If SuperMe's tools (ask, people_search, etc., possibly prefixed like mcp__superme__) aren't available, load them if this host defers tools. If they still aren't there, SuperMe MCP isn't connected: give the user the one link below in one short line, keep their question, and run it after the user signs in. Don't substitute web search or general knowledge.
+- On claude.ai or the Claude desktop app: https://claude.ai/directory/superme — Connect, then sign in.
+- If that page cannot connect it: https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=SuperMe&connectorUrl=https%3A%2F%2Fmcp.superme.ai — confirm the dialog, then sign in.
+- Any other host: use its own connect flow if it has one; otherwise add https://mcp.superme.ai as an MCP server and sign in.
 
 ## Pick who to ask
 - An attached work group (superme.ai/wg/{id}) gives the work_group_id. Use it.
@@ -16,7 +19,7 @@ If SuperMe's tools (ask, people_search, etc., possibly prefixed like mcp__superm
 - Nothing named: call ask with no people. The user's SuperMe picks who to bring in from their network.
 
 ## Ask
-- Pass the user's question verbatim. Their SuperMe refines it for the people asked.
+- Pass the user's question verbatim, then a "Context:" line with what it depends on: what "it", "this" or "they" refer to, and the specifics given earlier in this session. Their SuperMe refines it for the people asked but never sees this session.
 - Follow-ups: pass prior_ask_ref. Do not start a new ask.
 
 ## Read
@@ -25,4 +28,3 @@ If SuperMe's tools (ask, people_search, etc., possibly prefixed like mcp__superm
 - After the first two or three replies, give the user a first synthesis, not a status update.
 - Lead that synthesis with how people got the same decision through and what the holdouts cared about, each with who said it. Give the words that worked, and say when they let it go.
 - Stop when the status is no longer in progress or the summary shows everyone has replied. If two waits in a row bring nothing new, stop and say who is still pending.
-- Private citations (superme.ai/private/...): say they exist, never paste them.
