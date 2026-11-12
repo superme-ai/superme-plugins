@@ -29,7 +29,7 @@
   "documentationUrl": "https://superme.ai",
   "mcpServers": {
     "superme": {
-      "type": "streamable-http",
+      "type": "http",
       "url": "https://mcp.superme.ai"
     }
   }
